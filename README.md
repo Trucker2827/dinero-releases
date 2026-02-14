@@ -202,11 +202,12 @@ Partially Signed Bitcoin Transactions (PSBTs) allow transaction construction to 
 | RPC Port | `20998` |
 | Address prefix | `dnr1` (Bech32m) |
 | Coin type (BIP44) | `1447'` |
-| Block time target | ~10 minutes |
+| Block time target | ~2 minutes |
 | Mining algorithm | SHA-256d (double SHA-256) |
-| Max supply | 21,000,000 DNR |
-| Block reward | 50 DNR (halving every 210,000 blocks) |
-| Smallest unit | 1 satoshi = 0.00000001 DNR |
+| Max supply | 265,428,000 DNR |
+| Block reward | 100 DNR (halving every 1,314,000 blocks / ~5 years) |
+| Smallest unit | 1 una = 0.00000001 DNR |
+| Coinbase maturity | 100 confirmations |
 | Consensus | Nakamoto consensus (longest valid chain) |
 | UTXO model | Utreexo accumulator (forest of Merkle trees) |
 
@@ -365,8 +366,8 @@ The standalone miner connects to dinerod via RPC and submits solutions. It autom
 ### Mining tips
 
 - **Thread count**: Start with half your CPU cores. More threads = more hash power, but also more heat and power usage. Leave some cores free for the system.
-- **Solo mining**: With low network difficulty, solo mining is practical. You get the full 50 DNR block reward.
-- **Block time**: Target is ~10 minutes. With low network hash rate, you may find blocks faster.
+- **Solo mining**: With low network difficulty, solo mining is practical. You get the full 100 DNR block reward.
+- **Block time**: Target is ~2 minutes. With low network hash rate, you may find blocks faster.
 - **Difficulty adjustment**: Adjusts every block based on recent block times. If you're the only miner, difficulty drops to match your hash rate.
 
 ---
@@ -433,8 +434,8 @@ Thanks to Utreexo, these requirements stay small even as the chain grows. A Rasp
 | Signatures | ECDSA + Schnorr | Schnorr only |
 | Key derivation | BIP44/49/84/86 | BIP86 only (Taproot) |
 | Mining algorithm | SHA-256 | SHA-256 (same) |
-| Max supply | 21M BTC | 21M DNR |
-| Block time | ~10 min | ~10 min |
+| Max supply | 21M BTC | 265M DNR |
+| Block time | ~10 min | ~2 min |
 | Seed phrase | BIP39 (12/24 words) | BIP39 (12 words) |
 | PSBT | Supported | Supported |
 | Privacy baseline | Mixed (address type leaks info) | Uniform (all txs look identical) |
