@@ -11,13 +11,14 @@ Official binary releases for Dinero (DNR) - Real Money for Free People.
 | **macOS** CLI | Apple Silicon (arm64) | [dinero-v4.3.0-macos-arm64.tar.gz](https://github.com/Trucker2827/dinero-releases/releases/download/v4.3.0/dinero-v4.3.0-macos-arm64.tar.gz) |
 | **macOS** Qt Wallet | Apple Silicon (arm64) | [dinero-qt-v4.3.0-macos-arm64.zip](https://github.com/Trucker2827/dinero-releases/releases/download/v4.3.0/dinero-qt-v4.3.0-macos-arm64.zip) |
 | **Linux** CLI | x86_64 | [dinero-v4.3.0-linux-x86_64.tar.gz](https://github.com/Trucker2827/dinero-releases/releases/download/v4.3.0/dinero-v4.3.0-linux-x86_64.tar.gz) |
+| **Linux** Qt Wallet | x86_64 | [dinero-qt-v4.3.0-linux-x86_64.tar.gz](https://github.com/Trucker2827/dinero-releases/releases/download/v4.3.0/dinero-qt-v4.3.0-linux-x86_64.tar.gz) |
 
 ## What's Included
 
 - `dinerod` - Full node daemon
 - `dinero-cli` - Command-line RPC client
 - `dinero-miner` - CPU miner (SHA256)
-- `dinero-qt.app` - Desktop wallet (macOS only)
+- `dinero-qt` - Desktop wallet (macOS .app bundle / Linux binary)
 
 ## Verify Downloads
 
@@ -45,6 +46,13 @@ cd dinero-v4.3.0-linux-x86_64
 ```bash
 unzip dinero-qt-v4.3.0-macos-arm64.zip
 open dinero-qt.app
+```
+
+### Qt Wallet (Linux)
+```bash
+sudo apt install qt6-base-dev
+tar xzf dinero-qt-v4.3.0-linux-x86_64.tar.gz
+./dinero-qt-v4.3.0-linux-x86_64/dinero-qt
 ```
 
 ## Features
