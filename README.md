@@ -490,6 +490,12 @@ Utreexo's security rests on SHA-256 collision resistance — the same assumption
 - **Exclusion proof**: An adversary cannot hide an existing UTXO (pretend it was already spent) without the forest roots being wrong, which every node independently verifies
 - **Binding**: The forest roots in the block header commit to the exact set of all unspent outputs. Any modification produces different roots.
 
+### Full Technical Paper
+
+For the complete engineering story — the 128-byte header format, the two-pass validation algorithm, the state transition proof system, and the ten consensus-critical bugs we found and fixed — read the full whitepaper:
+
+**[Utreexo in Production: Engineering a Cryptographic Accumulator for Live Consensus](UTREEXO-WHITEPAPER.md)**
+
 ### References
 
 - Utreexo paper: Thaddeus Dryja, "Utreexo: A dynamic hash-based accumulator optimized for the Bitcoin UTXO set" (MIT DCI, 2019)
