@@ -1,6 +1,6 @@
 # Utreexo in Production: Engineering a Cryptographic Accumulator for Live Consensus
 
-**Armin Hajiyev**
+**Armin Hajdarevic**
 **arminhaj@stanford.edu**
 
 **February 2026**
