@@ -1,0 +1,253 @@
+# =============================================================================
+# Dinero Windows Release Builder
+# =============================================================================
+# MANUAL TRIGGER ONLY - will NEVER run automatically on push/PR/schedule.
+# Strict timeout: 90 minutes max. Concurrency: 1 build at a time.
+# =============================================================================
+
+name: Build Windows Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version tag (e.g. v4.3.0)'
+        required: true
+        type: string
+      upload_to_release:
+        description: 'Upload artifacts to GitHub release'
+        required: false
+        type: boolean
+        default: false
+      dinero_branch:
+        description: 'Dinero-Coin branch'
+        required: false
+        type: string
+        default: 'p2p-fix'
+      qt_branch:
+        description: 'dinero-qt branch'
+        required: false
+        type: string
+        default: 'qt-main'
+      solo_miner_branch:
+        description: 'dinero-solo-miner branch'
+        required: false
+        type: string
+        default: 'main'
+
+# ONE build at a time. Cancel any running build if a new one is triggered.
+concurrency:
+  group: windows-release
+  cancel-in-progress: true
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    # HARD TIMEOUT: 90 minutes. If it takes longer, something is wrong.
+    timeout-minutes: 90
+
+    steps:
+      # =====================================================================
+      # 1. Checkout all three repos side by side
+      # =====================================================================
+      - name: Checkout dinero (daemon)
+        uses: actions/checkout@v4
+        with:
+          repository: Trucker2827/Dinero-Coin
+          ref: ${{ inputs.dinero_branch }}
+          submodules: recursive
+          path: dinero
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Checkout dinero-qt
+        uses: actions/checkout@v4
+        with:
+          repository: Trucker2827/dinero-qt
+          ref: ${{ inputs.qt_branch }}
+          path: dinero-qt
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Checkout dinero-solo-miner
+        uses: actions/checkout@v4
+        with:
+          repository: Trucker2827/dinero-solo-miner
+          ref: ${{ inputs.solo_miner_branch }}
+          path: dinero-solo-miner
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      # =====================================================================
+      # 2. Setup build tools
+      # =====================================================================
+      - name: Setup MSVC
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+
+      - name: Install Qt6
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: '6.7.3'
+          host: 'windows'
+          target: 'desktop'
+          arch: 'win64_msvc2019_64'
+          cache: true
+
+      - name: Install NASM (for OpenSSL)
+        uses: ilammy/setup-nasm@v1
+
+      - name: Install Strawberry Perl (for OpenSSL)
+        run: |
+          choco install strawberryperl --no-progress -y
+          echo "C:\Strawberry\perl\bin" >> $env:GITHUB_PATH
+
+      # =====================================================================
+      # 3. Cache vendored dependency builds
+      # =====================================================================
+      - name: Cache dinerod build
+        uses: actions/cache@v4
+        with:
+          path: dinero/build
+          key: dinerod-win-${{ hashFiles('dinero/CMakeLists.txt', 'dinero/third_party/**') }}
+          restore-keys: |
+            dinerod-win-
+
+      # =====================================================================
+      # 4. Build dinerod + dinero-cli (daemon)
+      # =====================================================================
+      - name: Configure dinerod
+        run: |
+          cd dinero
+          cmake -S . -B build -G "Visual Studio 17 2022" -A x64 `
+            -DCMAKE_BUILD_TYPE=Release `
+            -DDINERO_RELEASE=ON `
+            -DDINERO_USE_VENDORED_DEPS=ON `
+            -DUSE_SYSTEM_OPENSSL=OFF `
+            -DENABLE_GPU_MINING=OFF `
+            -DENABLE_GRPC=OFF `
+            -DENABLE_TREZOR=OFF `
+            -DCMAKE_MSVC_RUNTIME_LIBRARY="MultiThreaded"
+
+      - name: Build dinerod and dinero-cli
+        run: |
+          cd dinero
+          cmake --build build --config Release --target dinerod dinero-cli -- /maxcpucount
+
+      - name: Verify dinerod build
+        run: |
+          if (!(Test-Path "dinero\build\bin\Release\dinerod.exe")) {
+            # Try alternate output paths
+            $found = Get-ChildItem -Path "dinero\build" -Recurse -Filter "dinerod.exe" | Select-Object -First 1
+            if ($found) {
+              echo "DINEROD_PATH=$($found.FullName)" >> $env:GITHUB_ENV
+              echo "Found dinerod at: $($found.FullName)"
+            } else {
+              echo "::error::dinerod.exe not found in build directory"
+              Get-ChildItem -Path "dinero\build" -Recurse -Filter "*.exe" | Select-Object FullName
+              exit 1
+            }
+          } else {
+            echo "DINEROD_PATH=dinero\build\bin\Release\dinerod.exe" >> $env:GITHUB_ENV
+          }
+
+      - name: Verify dinero-cli build
+        run: |
+          $found = Get-ChildItem -Path "dinero\build" -Recurse -Filter "dinero-cli.exe" | Select-Object -First 1
+          if ($found) {
+            echo "DINERO_CLI_PATH=$($found.FullName)" >> $env:GITHUB_ENV
+          } else {
+            echo "::warning::dinero-cli.exe not found, continuing without it"
+          }
+
+      # =====================================================================
+      # 5. Build dinero-qt (wallet + embedded miner)
+      # =====================================================================
+      - name: Configure dinero-qt
+        run: |
+          cd dinero-qt
+          cmake -S . -B build -G "Visual Studio 17 2022" -A x64 `
+            -DCMAKE_BUILD_TYPE=Release `
+            -DCMAKE_PREFIX_PATH="$env:Qt6_DIR" `
+            -DNR_ENABLE_WEBSOCKETS=ON `
+            -DNR_ENABLE_QRENCODE=OFF `
+            -DCMAKE_MSVC_RUNTIME_LIBRARY="MultiThreaded"
+
+      - name: Build dinero-qt
+        run: |
+          cd dinero-qt
+          cmake --build build --config Release -- /maxcpucount
+
+      - name: Verify dinero-qt build
+        run: |
+          $found = Get-ChildItem -Path "dinero-qt\build" -Recurse -Filter "dinero-qt.exe" | Select-Object -First 1
+          if ($found) {
+            echo "DINERO_QT_PATH=$($found.FullName)" >> $env:GITHUB_ENV
+            echo "Found dinero-qt at: $($found.FullName)"
+          } else {
+            echo "::error::dinero-qt.exe not found"
+            exit 1
+          }
+
+      # =====================================================================
+      # 6. Package everything
+      # =====================================================================
+      - name: Create release package
+        run: |
+          $version = "${{ inputs.version }}"
+          $pkg = "dinero-$version-windows-x64"
+          $qtpkg = "dinero-qt-$version-windows-x64"
+
+          # --- CLI package ---
+          New-Item -ItemType Directory -Force -Path "$pkg"
+          Copy-Item $env:DINEROD_PATH "$pkg\dinerod.exe"
+          if ($env:DINERO_CLI_PATH -and (Test-Path $env:DINERO_CLI_PATH)) {
+            Copy-Item $env:DINERO_CLI_PATH "$pkg\dinero-cli.exe"
+          }
+
+          # --- Qt package ---
+          New-Item -ItemType Directory -Force -Path "$qtpkg"
+          Copy-Item $env:DINERO_QT_PATH "$qtpkg\dinero-qt.exe"
+          # Bundle dinerod inside Qt package
+          Copy-Item $env:DINEROD_PATH "$qtpkg\dinerod.exe"
+
+          # Run windeployqt to bundle Qt DLLs
+          & windeployqt --release --no-translations --no-opengl-sw "$qtpkg\dinero-qt.exe"
+
+          # Create zip archives
+          Compress-Archive -Path "$pkg\*" -DestinationPath "$pkg.zip"
+          Compress-Archive -Path "$qtpkg\*" -DestinationPath "$qtpkg.zip"
+
+          # SHA256 checksums
+          $cli_hash = (Get-FileHash "$pkg.zip" -Algorithm SHA256).Hash.ToLower()
+          $qt_hash = (Get-FileHash "$qtpkg.zip" -Algorithm SHA256).Hash.ToLower()
+          "$cli_hash  $pkg.zip" | Out-File -Encoding ascii "SHA256SUMS-windows.txt"
+          "$qt_hash  $qtpkg.zip" | Out-File -Encoding ascii -Append "SHA256SUMS-windows.txt"
+
+          echo "CLI_PKG=$pkg.zip" >> $env:GITHUB_ENV
+          echo "QT_PKG=$qtpkg.zip" >> $env:GITHUB_ENV
+
+      # =====================================================================
+      # 7. Upload artifacts (always available as workflow artifacts)
+      # =====================================================================
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dinero-windows-${{ inputs.version }}
+          path: |
+            *.zip
+            SHA256SUMS-windows.txt
+          retention-days: 30
+
+      # =====================================================================
+      # 8. Optionally upload to GitHub release
+      # =====================================================================
+      - name: Upload to release
+        if: ${{ inputs.upload_to_release }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release upload ${{ inputs.version }} `
+            $env:CLI_PKG `
+            $env:QT_PKG `
+            SHA256SUMS-windows.txt `
+            --repo Trucker2827/dinero-releases `
+            --clobber
