@@ -103,6 +103,16 @@ jobs:
       # =====================================================================
       # 3. Cache vendored dependency builds
       # =====================================================================
+      - name: Cache vendored OpenSSL
+        id: cache-openssl
+        uses: actions/cache@v4
+        with:
+          path: |
+            dinero/third_party/openssl-3.3.2/libcrypto.lib
+            dinero/third_party/openssl-3.3.2/libssl.lib
+            dinero/third_party/openssl-3.3.2/include/openssl/*.h
+          key: openssl-win-3.3.2-${{ hashFiles('dinero/third_party/openssl-3.3.2/Configure') }}
+
       - name: Cache dinerod build
         uses: actions/cache@v4
         with:
@@ -112,7 +122,25 @@ jobs:
             dinerod-win-
 
       # =====================================================================
-      # 4. Build dinerod + dinero-cli (daemon)
+      # 4. Build vendored OpenSSL for Windows
+      # =====================================================================
+      - name: Build vendored OpenSSL
+        if: steps.cache-openssl.outputs.cache-hit != 'true'
+        run: |
+          cd dinero\third_party\openssl-3.3.2
+          perl Configure VC-WIN64A no-shared no-tests no-apps no-docs `
+            --prefix="$PWD\install"
+          nmake
+          if (!(Test-Path "libcrypto.lib") -or !(Test-Path "libssl.lib")) {
+            echo "::error::OpenSSL build failed - .lib files not found"
+            Get-ChildItem -Filter "*.lib" | Select-Object FullName
+            exit 1
+          }
+          echo "OpenSSL built successfully:"
+          Get-ChildItem -Filter "*.lib" | Select-Object FullName, Length
+
+      # =====================================================================
+      # 5. Build dinerod + dinero-cli (daemon)
       # =====================================================================
       - name: Configure dinerod
         run: |
@@ -159,7 +187,7 @@ jobs:
           }
 
       # =====================================================================
-      # 5. Build dinero-qt (wallet + embedded miner)
+      # 6. Build dinero-qt (wallet + embedded miner)
       # =====================================================================
       - name: Configure dinero-qt
         run: |
@@ -188,7 +216,7 @@ jobs:
           }
 
       # =====================================================================
-      # 6. Package everything
+      # 7. Package everything
       # =====================================================================
       - name: Create release package
         run: |
@@ -226,7 +254,7 @@ jobs:
           echo "QT_PKG=$qtpkg.zip" >> $env:GITHUB_ENV
 
       # =====================================================================
-      # 7. Upload artifacts (always available as workflow artifacts)
+      # 8. Upload artifacts (always available as workflow artifacts)
       # =====================================================================
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
@@ -238,7 +266,7 @@ jobs:
           retention-days: 30
 
       # =====================================================================
-      # 8. Optionally upload to GitHub release
+      # 9. Optionally upload to GitHub release
       # =====================================================================
       - name: Upload to release
         if: ${{ inputs.upload_to_release }}
