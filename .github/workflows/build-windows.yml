@@ -57,7 +57,7 @@ jobs:
           ref: ${{ inputs.dinero_branch }}
           submodules: recursive
           path: dinero
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.PAT_TOKEN }}
 
       - name: Checkout dinero-qt
         uses: actions/checkout@v4
@@ -65,7 +65,7 @@ jobs:
           repository: Trucker2827/dinero-qt
           ref: ${{ inputs.qt_branch }}
           path: dinero-qt
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.PAT_TOKEN }}
 
       - name: Checkout dinero-solo-miner
         uses: actions/checkout@v4
@@ -73,7 +73,7 @@ jobs:
           repository: Trucker2827/dinero-solo-miner
           ref: ${{ inputs.solo_miner_branch }}
           path: dinero-solo-miner
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.PAT_TOKEN }}
 
       # =====================================================================
       # 2. Setup build tools
