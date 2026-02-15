@@ -153,6 +153,7 @@ jobs:
             -DENABLE_GPU_MINING=OFF `
             -DENABLE_GRPC=OFF `
             -DENABLE_TREZOR=OFF `
+            -DENABLE_HARDWARE_WALLETS=OFF `
             -DCMAKE_MSVC_RUNTIME_LIBRARY="MultiThreaded"
 
       - name: Build dinerod and dinero-cli
