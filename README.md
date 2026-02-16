@@ -10,14 +10,14 @@ Genesis Block: 2025
 
 ## Downloads
 
-**[Latest Release: v4.3.0](https://github.com/Trucker2827/dinero-releases/releases/tag/v4.3.0)**
+**[Latest Release: v5.2.0](https://github.com/Trucker2827/dinero-releases/releases/tag/v5.2.0)**
 
 | Platform | Type | Download |
 |----------|------|----------|
-| **macOS** | Desktop Wallet (GUI) | [dinero-qt-v4.3.0-macos-arm64.zip](https://github.com/Trucker2827/dinero-releases/releases/download/v4.3.0/dinero-qt-v4.3.0-macos-arm64.zip) |
-| **macOS** | CLI Tools (daemon + miner) | [dinero-v4.3.0-macos-arm64.tar.gz](https://github.com/Trucker2827/dinero-releases/releases/download/v4.3.0/dinero-v4.3.0-macos-arm64.tar.gz) |
-| **Linux** | Desktop Wallet (GUI) | [dinero-qt-v4.3.0-linux-x86_64.tar.gz](https://github.com/Trucker2827/dinero-releases/releases/download/v4.3.0/dinero-qt-v4.3.0-linux-x86_64.tar.gz) |
-| **Linux** | CLI Tools (daemon + miner) | [dinero-v4.3.0-linux-x86_64.tar.gz](https://github.com/Trucker2827/dinero-releases/releases/download/v4.3.0/dinero-v4.3.0-linux-x86_64.tar.gz) |
+| **macOS** | Desktop Wallet (GUI) | [dinero-qt-v5.2.0-macos-arm64.zip](https://github.com/Trucker2827/dinero-releases/releases/download/v5.2.0/dinero-qt-v5.2.0-macos-arm64.zip) |
+| **macOS** | CLI Tools (daemon + miner) | [dinero-v5.2.0-macos-arm64.tar.gz](https://github.com/Trucker2827/dinero-releases/releases/download/v5.2.0/dinero-v5.2.0-macos-arm64.tar.gz) |
+| **Linux** | Desktop Wallet (GUI) | [dinero-qt-v5.2.0-linux-x86_64.tar.gz](https://github.com/Trucker2827/dinero-releases/releases/download/v5.2.0/dinero-qt-v5.2.0-linux-x86_64.tar.gz) |
+| **Linux** | CLI Tools (daemon + miner) | [dinero-v5.2.0-linux-x86_64.tar.gz](https://github.com/Trucker2827/dinero-releases/releases/download/v5.2.0/dinero-v5.2.0-linux-x86_64.tar.gz) |
 
 ### What's in each package
 
@@ -52,14 +52,14 @@ sha256sum -c SHA256SUMS.txt
 
 **macOS:**
 ```bash
-unzip dinero-qt-v4.3.0-macos-arm64.zip
+unzip dinero-qt-v5.2.0-macos-arm64.zip
 open dinero-qt.app
 ```
 
 **Linux:**
 ```bash
-tar xzf dinero-qt-v4.3.0-linux-x86_64.tar.gz
-cd dinero-qt-v4.3.0-linux-x86_64
+tar xzf dinero-qt-v5.2.0-linux-x86_64.tar.gz
+cd dinero-qt-v5.2.0-linux-x86_64
 ./dinero-qt
 ```
 
@@ -69,15 +69,15 @@ The wallet automatically starts the daemon, connects to the network, and begins 
 
 **macOS:**
 ```bash
-tar xzf dinero-v4.3.0-macos-arm64.tar.gz
-cd dinero-v4.3.0-macos-arm64
+tar xzf dinero-v5.2.0-macos-arm64.tar.gz
+cd dinero-v5.2.0-macos-arm64
 ./dinerod --listen --rpc
 ```
 
 **Linux:**
 ```bash
-tar xzf dinero-v4.3.0-linux-x86_64.tar.gz
-cd dinero-v4.3.0-linux-x86_64
+tar xzf dinero-v5.2.0-linux-x86_64.tar.gz
+cd dinero-v5.2.0-linux-x86_64
 ./dinerod --listen --rpc
 ```
 
@@ -388,8 +388,8 @@ open dinero-qt.app
 
 ```bash
 # Download and extract
-tar xzf dinero-v4.3.0-linux-x86_64.tar.gz
-cd dinero-v4.3.0-linux-x86_64
+tar xzf dinero-v5.2.0-linux-x86_64.tar.gz
+cd dinero-v5.2.0-linux-x86_64
 
 # Create systemd service (optional)
 sudo tee /etc/systemd/system/dinerod.service << 'EOF'
