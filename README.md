@@ -48,9 +48,13 @@ cd linux && shasum -a 256 -c SHA256SUMS.txt
 ## Quick Start
 
 1. Download binaries for your platform
-2. Run `dinerod` to start the node
-3. Run `dinero-qt.app` for GUI wallet (macOS)
-4. Create wallet with 12-word seed phrase
+2. **macOS: remove quarantine flag before first run:**
+   ```bash
+   xattr -cr dinerod dinero-cli dinero-miner dinero-qt.app
+   ```
+3. Run `dinerod` to start the node
+4. Run `dinero-qt.app` for GUI wallet (macOS)
+5. Create wallet with 12-word seed phrase
 
 ## Links
 
