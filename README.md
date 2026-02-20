@@ -2,9 +2,9 @@
 
 Official binary releases for Dinero (DNR) - Real Money for Free People.
 
-## v0.1.0-stable
+## v0.2.0-stable
 
-Canonical wallet baseline. BIP86 Taproot derivation frozen at coin type 1447.
+Wallet security hardening release. All seed/mnemonic persistence is now encrypted-at-rest.
 
 ### Downloads
 
@@ -27,7 +27,16 @@ cd mac && shasum -a 256 -c SHA256SUMS.txt
 cd linux && shasum -a 256 -c SHA256SUMS.txt
 ```
 
-## What's in this release
+### What's new in v0.2.0
+
+- **Encrypted-at-rest wallet storage** - seed and mnemonic are always AES-256-GCM encrypted on disk, even for unencrypted wallets (sealed with empty passphrase)
+- **KDF parameter persistence** - encryption metadata table now records algorithm, iteration count, cipher, and salt with every encrypted blob
+- **Version-dispatched seed decryption** - loadMasterSeed reads encryption_version from DB instead of brute-forcing iteration candidates
+- **Legacy plaintext load blocked** - HDWalletManager refuses to load old mnemonic_plaintext entries (migration required)
+- **FFI security hardening** - global mnemonic variable removed, ScopeExit RAII cleanup for sensitive data, mnemonic readback APIs disabled
+- **Migration-safe** - legacy encrypted formats (Argon2id, old PBKDF2) still load correctly
+
+### What was in v0.1.0
 
 - BIP86 Taproot-only wallet (m/86'/1447'/0'/0/*)
 - BIP39 12-word mnemonic seed backup
